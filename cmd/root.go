@@ -23,14 +23,23 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/spf13/cobra"
+
+	"github.com/charmbracelet/bubbles/progress"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/sarvsav/learnyougo/metadata"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+
+const exercises = "./exercises/"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -42,9 +51,7 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: hello,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -94,4 +101,84 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+const (
+	padding  = 2
+	maxWidth = 80
+)
+
+var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+
+func hello(cmd *cobra.Command, args []string) {
+	a, _ := metadata.ProblemList(exercises)
+	m := model{
+		progress: progress.New(progress.WithDefaultGradient()),
+	}
+
+	if err := tea.NewProgram(m).Start(); err != nil {
+		fmt.Println("Oh no!", err)
+		os.Exit(1)
+	}
+	fmt.Println(a)
+	data, _ := metadata.ProblemDescription(exercises, 1)
+	fmt.Println(data)
+	hint, _ := metadata.ProblemHint(exercises, 1)
+	fmt.Println(hint)
+}
+
+type tickMsg time.Time
+
+type model struct {
+	progress progress.Model
+}
+
+func (_ model) Init() tea.Cmd {
+	return tickCmd()
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		return m, tea.Quit
+
+	case tea.WindowSizeMsg:
+		m.progress.Width = msg.Width - padding*2 - 4
+		if m.progress.Width > maxWidth {
+			m.progress.Width = maxWidth
+		}
+		return m, nil
+
+	case tickMsg:
+		if m.progress.Percent() == 1.0 {
+			return m, tea.Quit
+		}
+
+		// Note that you can also use progress.Model.SetPercent to set the
+		// percentage value explicitly, too.
+		cmd := m.progress.IncrPercent(0.25)
+		return m, tea.Batch(tickCmd(), cmd)
+
+	// FrameMsg is sent when the progress bar wants to animate itself
+	case progress.FrameMsg:
+		progressModel, cmd := m.progress.Update(msg)
+		m.progress = progressModel.(progress.Model)
+		return m, cmd
+
+	default:
+		return m, nil
+	}
+}
+
+func (e model) View() string {
+	pad := strings.Repeat(" ", padding)
+	return "\n" +
+		pad + e.progress.View() + "\n\n" +
+		pad + helpStyle("Press any key to quit")
+}
+
+func tickCmd() tea.Cmd {
+	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
+		return tickMsg(t)
+	})
 }

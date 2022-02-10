@@ -1,0 +1,7 @@
+title = "Hello World!"
+
+[filedata]
+    filename = "helloWorld.go"
+    problem = "problem"
+    hint = "hint"
+    language = ["en"]
