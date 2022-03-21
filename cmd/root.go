@@ -201,6 +201,11 @@ func hello(cmd *cobra.Command, args []string) {
 	result = markdown.Render(string(source), 80, 6)
 
 	fmt.Println(result)
+	in, _ := ioutil.ReadFile("./exercises/1/hint.en.md")
+	data1 := string(in)
+	fmt.Println(data1)
+	out, err := glamour.Render(data1, "dark")
+	fmt.Print(out)
 
 }
 
