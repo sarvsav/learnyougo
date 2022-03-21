@@ -23,14 +23,18 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 
+	markdown "github.com/MichaelMure/go-term-markdown"
 	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/sarvsav/learnyougo/metadata"
@@ -108,7 +112,68 @@ const (
 	maxWidth = 80
 )
 
+type example struct {
+	viewport viewport.Model
+}
+
+func (e example) Init() tea.Cmd {
+	return nil
+}
+
+func (e example) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		e.viewport.Width = msg.Width
+		return e, nil
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c", "esc":
+			return e, tea.Quit
+		default:
+			var cmd tea.Cmd
+			e.viewport, cmd = e.viewport.Update(msg)
+			return e, cmd
+		}
+	default:
+		return e, nil
+	}
+}
+
+func (e example) View() string {
+	return e.viewport.View() + e.helpView()
+}
+
+func (e example) helpView() string {
+	return hintStyle("\n  ↑/↓: Navigate • q: Quit\n")
+}
+
+func newExample(content string) (*example, error) {
+	vp := viewport.New(78, 20)
+	vp.Style = lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("62")).
+		PaddingRight(2)
+
+	renderer, err := glamour.NewTermRenderer(glamour.WithStylePath("notty"))
+	if err != nil {
+		return nil, err
+	}
+
+	str, err := renderer.Render(content)
+	if err != nil {
+		return nil, err
+	}
+
+	vp.SetContent(str)
+
+	return &example{
+		viewport: vp,
+	}, nil
+}
+
 var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+var hintStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
 
 func hello(cmd *cobra.Command, args []string) {
 	a, _ := metadata.ProblemList(exercises)
@@ -124,7 +189,19 @@ func hello(cmd *cobra.Command, args []string) {
 	data, _ := metadata.ProblemDescription(exercises, 1)
 	fmt.Println(data)
 	hint, _ := metadata.ProblemHint(exercises, 1)
-	fmt.Println(hint)
+	result := markdown.Render(hint, 80, 6)
+	fmt.Println(result)
+
+	path := "Readme.md"
+	source, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	result = markdown.Render(string(source), 80, 6)
+
+	fmt.Println(result)
+
 }
 
 type tickMsg time.Time
