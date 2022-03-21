@@ -4,7 +4,7 @@ Hint
 To complete your firs golang program, create a new file with a `.go` extension and start
 writing Go! Execute your program by running it with the `go` command. e.g.:
 
-```haskell
+```golang
 go run main.go
 ```
 
