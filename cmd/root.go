@@ -23,14 +23,25 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
+	"io/ioutil"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/spf13/cobra"
+
+	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
+	"github.com/charmbracelet/lipgloss"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+
+const exercises = "./exercises/"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -42,9 +53,7 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: hello,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -94,4 +103,164 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+const (
+	padding  = 2
+	maxWidth = 80
+)
+
+type example struct {
+	viewport viewport.Model
+}
+
+func (e example) Init() tea.Cmd {
+	return nil
+}
+
+func (e example) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		e.viewport.Width = msg.Width
+		return e, nil
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c", "esc":
+			return e, tea.Quit
+		default:
+			var cmd tea.Cmd
+			e.viewport, cmd = e.viewport.Update(msg)
+			return e, cmd
+		}
+	default:
+		return e, nil
+	}
+}
+
+func (e example) View() string {
+	return e.viewport.View() + e.helpView()
+}
+
+func (e example) helpView() string {
+	return hintStyle("\n  ↑/↓: Navigate • q: Quit\n")
+}
+
+func newExample(content string) (*example, error) {
+	vp := viewport.New(78, 20)
+	vp.Style = lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("62")).
+		PaddingRight(2)
+
+	renderer, err := glamour.NewTermRenderer(glamour.WithStylePath("notty"))
+	if err != nil {
+		return nil, err
+	}
+
+	str, err := renderer.Render(content)
+	if err != nil {
+		return nil, err
+	}
+
+	vp.SetContent(str)
+
+	return &example{
+		viewport: vp,
+	}, nil
+}
+
+var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+var hintStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
+
+func hello(cmd *cobra.Command, args []string) {
+	//a, _ := metadata.ProblemList(exercises)
+	m := model{
+		progress: progress.New(progress.WithDefaultGradient()),
+	}
+
+	if err := tea.NewProgram(m).Start(); err != nil {
+		fmt.Println("Oh no!", err)
+		os.Exit(1)
+	}
+	//fmt.Println(a)
+	//data, _ := metadata.ProblemDescription(exercises, 1)
+	//fmt.Println(data)
+	//hint, _ := metadata.ProblemHint(exercises, 1)
+	//result := markdown.Render(hint, 80, 6)
+	//fmt.Println(result)
+
+	//path := "Readme.md"
+	//source, err := ioutil.ReadFile(path)
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	//result = markdown.Render(string(source), 80, 6)
+	//
+	//fmt.Println(result)
+	in, _ := ioutil.ReadFile("./exercises/1/hint.en.md")
+	data1 := string(in)
+	fmt.Println(data1)
+	out, _ := glamour.Render(data1, "dark")
+	fmt.Println(strings.Repeat("*", 80))
+	fmt.Print(out)
+	fmt.Println(strings.Repeat("*", 80))
+
+}
+
+type tickMsg time.Time
+
+type model struct {
+	progress progress.Model
+}
+
+func (_ model) Init() tea.Cmd {
+	return tickCmd()
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		return m, tea.Quit
+
+	case tea.WindowSizeMsg:
+		m.progress.Width = msg.Width - padding*2 - 4
+		if m.progress.Width > maxWidth {
+			m.progress.Width = maxWidth
+		}
+		return m, nil
+
+	case tickMsg:
+		if m.progress.Percent() == 1.0 {
+			return m, tea.Quit
+		}
+
+		// Note that you can also use progress.Model.SetPercent to set the
+		// percentage value explicitly, too.
+		cmd := m.progress.IncrPercent(0.25)
+		return m, tea.Batch(tickCmd(), cmd)
+
+	// FrameMsg is sent when the progress bar wants to animate itself
+	case progress.FrameMsg:
+		progressModel, cmd := m.progress.Update(msg)
+		m.progress = progressModel.(progress.Model)
+		return m, cmd
+
+	default:
+		return m, nil
+	}
+}
+
+func (e model) View() string {
+	pad := strings.Repeat(" ", padding)
+	return "\n" +
+		pad + e.progress.View() + "\n\n" +
+		pad + helpStyle("Press any key to quit")
+}
+
+func tickCmd() tea.Cmd {
+	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
+		return tickMsg(t)
+	})
 }
