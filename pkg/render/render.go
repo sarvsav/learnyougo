@@ -2,14 +2,12 @@ package render
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	"io/ioutil"
 	"os"
-	"strings"
-	"time"
 )
 
 const (
@@ -17,77 +15,63 @@ const (
 	maxWidth = 80
 )
 
-type tickMsg time.Time
-
 type model struct {
-	progress progress.Model
+	viewport viewport.Model
 }
 
 func (_ model) Init() tea.Cmd {
-	return tickCmd()
-}
-
-func tickCmd() tea.Cmd {
-	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
-		return tickMsg(t)
-	})
+	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		return m, tea.Quit
-
 	case tea.WindowSizeMsg:
-		m.progress.Width = msg.Width - padding*2 - 4
-		if m.progress.Width > maxWidth {
-			m.progress.Width = maxWidth
-		}
+		m.viewport.Width = msg.Width
 		return m, nil
 
-	case tickMsg:
-		if m.progress.Percent() == 1.0 {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c", "esc":
 			return m, tea.Quit
+		default:
+			var cmd tea.Cmd
+			m.viewport, cmd = m.viewport.Update(msg)
+			return m, cmd
 		}
-
-		// Note that you can also use progress.Model.SetPercent to set the
-		// percentage value explicitly, too.
-		cmd := m.progress.IncrPercent(0.25)
-		return m, tea.Batch(tickCmd(), cmd)
-
-	// FrameMsg is sent when the progress bar wants to animate itself
-	case progress.FrameMsg:
-		progressModel, cmd := m.progress.Update(msg)
-		m.progress = progressModel.(progress.Model)
-		return m, cmd
-
 	default:
 		return m, nil
 	}
 }
 
+func newExample() (*model, error) {
+	vp := viewport.New(80, 20)
+	vp.Style = lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("62")).
+		PaddingRight(2)
+
+	in, _ := ioutil.ReadFile("./exercises/1/solution/solution.md")
+	data1 := string(in)
+	out, _ := glamour.Render(data1, "dark")
+	vp.SetContent(out)
+
+	return &model{
+		viewport: vp,
+	}, nil
+}
+
 func Render() bool {
-	m := model{
-		progress: progress.New(progress.WithDefaultGradient()),
-	}
+	m, _ := newExample()
 
 	if err := tea.NewProgram(m).Start(); err != nil {
 		fmt.Println("Oh no!", err)
 		os.Exit(1)
 	}
-
-	in, _ := ioutil.ReadFile("./exercises/1/hint.en.md")
-	data1 := string(in)
-	out, _ := glamour.Render(data1, "dark")
-	fmt.Print(out)
 	return true
 }
 
 var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
 
 func (e model) View() string {
-	pad := strings.Repeat(" ", padding)
-	return "\n" +
-		pad + e.progress.View() + "\n\n" +
-		pad + helpStyle("Press any key to quit")
+	return e.viewport.View()
 }
