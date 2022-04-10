@@ -30,14 +30,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	markdown "github.com/MichaelMure/go-term-markdown"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/sarvsav/learnyougo/metadata"
 	"github.com/spf13/viper"
 )
 
@@ -176,7 +174,7 @@ var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
 var hintStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
 
 func hello(cmd *cobra.Command, args []string) {
-	a, _ := metadata.ProblemList(exercises)
+	//a, _ := metadata.ProblemList(exercises)
 	m := model{
 		progress: progress.New(progress.WithDefaultGradient()),
 	}
@@ -185,27 +183,29 @@ func hello(cmd *cobra.Command, args []string) {
 		fmt.Println("Oh no!", err)
 		os.Exit(1)
 	}
-	fmt.Println(a)
-	data, _ := metadata.ProblemDescription(exercises, 1)
-	fmt.Println(data)
-	hint, _ := metadata.ProblemHint(exercises, 1)
-	result := markdown.Render(hint, 80, 6)
-	fmt.Println(result)
+	//fmt.Println(a)
+	//data, _ := metadata.ProblemDescription(exercises, 1)
+	//fmt.Println(data)
+	//hint, _ := metadata.ProblemHint(exercises, 1)
+	//result := markdown.Render(hint, 80, 6)
+	//fmt.Println(result)
 
-	path := "Readme.md"
-	source, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
+	//path := "Readme.md"
+	//source, err := ioutil.ReadFile(path)
+	//if err != nil {
+	//	panic(err)
+	//}
 
-	result = markdown.Render(string(source), 80, 6)
-
-	fmt.Println(result)
+	//result = markdown.Render(string(source), 80, 6)
+	//
+	//fmt.Println(result)
 	in, _ := ioutil.ReadFile("./exercises/1/hint.en.md")
 	data1 := string(in)
 	fmt.Println(data1)
-	out, err := glamour.Render(data1, "dark")
+	out, _ := glamour.Render(data1, "dark")
+	fmt.Println(strings.Repeat("*", 80))
 	fmt.Print(out)
+	fmt.Println(strings.Repeat("*", 80))
 
 }
 
