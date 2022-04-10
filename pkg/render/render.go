@@ -45,10 +45,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func newExample() (*model, error) {
 	vp := viewport.New(80, 20)
-	vp.Style = lipgloss.NewStyle().
-		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("62")).
-		PaddingRight(2)
 
 	in, _ := ioutil.ReadFile("./exercises/1/solution/solution.md")
 	data1 := string(in)
