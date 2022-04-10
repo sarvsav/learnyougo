@@ -1,7 +1,12 @@
 title = "Hello World!"
 
 [filedata]
-    filename = "helloWorld.go"
     problem = "problem"
     hint = "hint"
     language = ["en"]
+
+[status]
+    attempts=0
+    rating=0
+    difficulty="easy"
+    completed=false
