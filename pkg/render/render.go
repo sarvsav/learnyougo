@@ -10,9 +10,10 @@ import (
 	"os"
 )
 
+// Standard terminal size
 const (
-	padding  = 2
-	maxWidth = 80
+	rows    = 24
+	columns = 80
 )
 
 type model struct {
@@ -44,7 +45,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func newExample() (*model, error) {
-	vp := viewport.New(80, 20)
+	vp := viewport.New(columns, rows)
 
 	in, _ := ioutil.ReadFile("./exercises/1/solution/solution.md")
 	data1 := string(in)
