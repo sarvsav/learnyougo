@@ -5,12 +5,9 @@ To complete your firs golang program, create a new file with a `.go` extension a
 writing Go code. Execute your program by running it with the `go` command, if the name of
 the file is `main.go`. e.g.:
 
-```golang
-go run main.go
+```shell
+$ go run main.go
 ```
-
-* [x] Carrots
-
 
 When you are done, you must run:
 

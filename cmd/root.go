@@ -41,8 +41,6 @@ import (
 
 var cfgFile string
 
-const exercises = "./exercises/"
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "learnyougo",
@@ -146,30 +144,6 @@ func (e example) helpView() string {
 	return hintStyle("\n  ↑/↓: Navigate • q: Quit\n")
 }
 
-func newExample(content string) (*example, error) {
-	vp := viewport.New(78, 20)
-	vp.Style = lipgloss.NewStyle().
-		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("62")).
-		PaddingRight(2)
-
-	renderer, err := glamour.NewTermRenderer(glamour.WithStylePath("notty"))
-	if err != nil {
-		return nil, err
-	}
-
-	str, err := renderer.Render(content)
-	if err != nil {
-		return nil, err
-	}
-
-	vp.SetContent(str)
-
-	return &example{
-		viewport: vp,
-	}, nil
-}
-
 var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
 var hintStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
 
@@ -183,22 +157,6 @@ func hello(cmd *cobra.Command, args []string) {
 		fmt.Println("Oh no!", err)
 		os.Exit(1)
 	}
-	//fmt.Println(a)
-	//data, _ := metadata.ProblemDescription(exercises, 1)
-	//fmt.Println(data)
-	//hint, _ := metadata.ProblemHint(exercises, 1)
-	//result := markdown.Render(hint, 80, 6)
-	//fmt.Println(result)
-
-	//path := "Readme.md"
-	//source, err := ioutil.ReadFile(path)
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//result = markdown.Render(string(source), 80, 6)
-	//
-	//fmt.Println(result)
 	in, _ := ioutil.ReadFile("./exercises/1/hint.en.md")
 	data1 := string(in)
 	fmt.Println(data1)
@@ -206,7 +164,6 @@ func hello(cmd *cobra.Command, args []string) {
 	fmt.Println(strings.Repeat("*", 80))
 	fmt.Print(out)
 	fmt.Println(strings.Repeat("*", 80))
-
 }
 
 type tickMsg time.Time

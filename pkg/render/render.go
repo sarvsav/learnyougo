@@ -5,9 +5,9 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
-	"github.com/charmbracelet/lipgloss"
 	"io/ioutil"
 	"os"
+	"time"
 )
 
 // Standard terminal size
@@ -16,19 +16,22 @@ const (
 	columns = 80
 )
 
+type tickMsg time.Time
+
 type model struct {
 	viewport viewport.Model
 }
 
-func (_ model) Init() tea.Cmd {
+func (m model) Init() tea.Cmd {
 	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.viewport.Width = msg.Width
-		return m, nil
+		return m, tick()
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -39,17 +42,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport, cmd = m.viewport.Update(msg)
 			return m, cmd
 		}
+
+	case tickMsg:
+		return m, tea.Quit
+
 	default:
 		return m, nil
 	}
 }
 
-func newExample() (*model, error) {
+func renderFile(file string) (*model, error) {
 	vp := viewport.New(columns, rows)
 
-	in, _ := ioutil.ReadFile("./exercises/1/solution/solution.md")
-	data1 := string(in)
-	out, _ := glamour.Render(data1, "dark")
+	in, _ := ioutil.ReadFile(file)
+	data := string(in)
+	out, _ := glamour.Render(data, "dark")
 	vp.SetContent(out)
 
 	return &model{
@@ -57,8 +64,8 @@ func newExample() (*model, error) {
 	}, nil
 }
 
-func Render() bool {
-	m, _ := newExample()
+func Render(file string) bool {
+	m, _ := renderFile(file)
 
 	if err := tea.NewProgram(m).Start(); err != nil {
 		fmt.Println("Oh no!", err)
@@ -67,8 +74,12 @@ func Render() bool {
 	return true
 }
 
-var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+func (m model) View() string {
+	return m.viewport.View()
+}
 
-func (e model) View() string {
-	return e.viewport.View()
+func tick() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+		return tickMsg(t)
+	})
 }
