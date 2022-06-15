@@ -1,5 +1,7 @@
 Solution
----
+=======
+
+* [x] main.go
 
 ```go
 package main
@@ -11,4 +13,3 @@ func main() {
 }
 ```
 
-**Press the `Q` key to quit!**

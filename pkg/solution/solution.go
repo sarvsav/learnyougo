@@ -5,6 +5,6 @@ import (
 )
 
 func Solution() string {
-	render.Render()
+	render.Render("./exercises/1/solution/solution.md")
 	return "Hello"
 }
