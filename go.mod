@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.21.0
 	github.com/charmbracelet/glamour v0.5.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.0
 )
 
