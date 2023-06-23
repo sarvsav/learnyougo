@@ -19,12 +19,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+
 package main
 
 import (
 	"fmt"
-	"github.com/hackebrot/turtle"
 	"os"
+
+	"github.com/hackebrot/turtle"
+	"github.com/sarvsav/learnyougo/cmd"
 )
 
 func main() {
@@ -40,5 +43,5 @@ func main() {
 	fmt.Printf("Char: %s\n", emoji.Char)
 	fmt.Printf("Category: %q\n", emoji.Category)
 	fmt.Printf("Keywords: %q\n", emoji.Keywords)
-	//cmd.Execute()
+	cmd.Execute()
 }
