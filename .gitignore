@@ -1,4 +1,5 @@
 .idea
-learnyougo
-*.exe
 dist
+
+*.exe
+*.msi
