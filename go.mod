@@ -1,6 +1,6 @@
 module github.com/sarvsav/learnyougo
 
-go 1.17
+go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.0.0
@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.19.3
 	github.com/charmbracelet/glamour v0.5.0
 	github.com/charmbracelet/lipgloss v0.4.0
+	github.com/hackebrot/turtle v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.0
