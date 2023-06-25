@@ -12,7 +12,7 @@ $ go run main.go
 When you are done, you must run:
 
 ```shell
-$ learnyougo verify main.go
+$ learnyougo verify -f <path/to/main.go>
 ```
 
 to proceed. Your program will be tested, a report will be generated, and the lesson will

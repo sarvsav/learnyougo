@@ -2,12 +2,13 @@ package render
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 )
 
 // Standard terminal size
@@ -65,7 +66,11 @@ func renderFile(file string) (*model, error) {
 }
 
 func Render(file string) bool {
-	m, _ := renderFile(file)
+	m, err := renderFile(file)
+	if err != nil {
+		fmt.Println("Oh no!", err)
+		os.Exit(1)
+	}
 
 	if err := tea.NewProgram(m).Start(); err != nil {
 		fmt.Println("Oh no!", err)

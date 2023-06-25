@@ -7,7 +7,6 @@ require (
 	github.com/charmbracelet/bubbles v0.16.1
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/glamour v0.6.0
-	github.com/hackebrot/turtle v0.2.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0

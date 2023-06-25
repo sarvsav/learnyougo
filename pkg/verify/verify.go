@@ -3,8 +3,9 @@ package verify
 
 import (
 	"fmt"
-	exercises "github.com/sarvsav/learnyougo/exercises/1"
 	"os"
+
+	exercises "github.com/sarvsav/learnyougo/exercises/1"
 )
 
 func Verify(fileName string) bool {
@@ -13,6 +14,9 @@ func Verify(fileName string) bool {
 		fmt.Printf("File doesn't exist: %s\n", fileName)
 		return false
 	}
-	exercises.Output(fileName)
-	return true
+	if exercises.Output(fileName) {
+		fmt.Println("Congratulations! Your output is correct.")
+		return true
+	}
+	return false
 }
